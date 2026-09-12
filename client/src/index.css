@@ -38,10 +38,15 @@
 }
 
 * { border-color: var(--border); }
-html { background: #071014; }
-body { margin: 0; min-width: 320px; background: #071014; color: #e6f0f2; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+html { background: #050708; scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; background: #050708; color: #e6f0f2; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
 button, a, input { -webkit-tap-highlight-color: transparent; }
 button { transition: transform 160ms ease-out, background-color 160ms ease-out, color 160ms ease-out; }
 button:active { transform: scale(.97); }
 ::selection { background: rgba(103,232,249,.25); }
+::selection { color: #f7ffff; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #050708; }
+::-webkit-scrollbar-thumb { background: #1b3036; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #2e5d66; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }

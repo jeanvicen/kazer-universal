@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
-  Activity, ArrowUpRight, Boxes, BrainCircuit, CheckCircle2, ChevronRight,
+  Activity, ArrowUpRight, Boxes, BrainCircuit, CheckCircle2, ChevronRight, Copy,
   CircleDot, Code2, Command, Database, GitBranch, KeyRound, Layers3,
   LockKeyhole, Menu, Network, Plus, Search, ShieldCheck, Sparkles, X,
 } from "lucide-react";
@@ -45,11 +46,29 @@ export default function Home() {
   const skills = trpc.platform.skills.useQuery();
   const health = trpc.platform.health.useQuery();
   const capabilities = trpc.platform.capabilities.useQuery();
+  const projects = trpc.workspace.projects.useQuery(undefined, { retry: false });
+  const createProject = trpc.workspace.createProject.useMutation({ onSuccess: () => projects.refetch() });
+  const createApiKey = trpc.workspace.createApiKey.useMutation();
+  const [projectDialog, setProjectDialog] = useState(false);
+  const [projectName, setProjectName] = useState("");
+  const [createdProject, setCreatedProject] = useState<{ id: number; projectId: string; name: string } | null>(null);
+  const [newApiKey, setNewApiKey] = useState<string | null>(null);
   const filteredRegistry = useMemo(() => registry.data?.filter(item =>
     `${item.name} ${item.category} ${item.capability}`.toLowerCase().includes(query.toLowerCase())
   ) ?? [], [registry.data, query]);
 
   const select = (label: string) => { setActive(label); setMobileOpen(false); };
+  const openProjectDialog = () => { setProjectDialog(true); setCreatedProject(null); setNewApiKey(null); setProjectName(""); };
+  const submitProject = async () => {
+    if (projectName.trim().length < 2) return;
+    const result = await createProject.mutateAsync({ name: projectName.trim(), environment: "development", capabilities: capabilities.data?.map(item => item.id) ?? [] });
+    setCreatedProject(result);
+  };
+  const issueApiKey = async () => {
+    if (!createdProject) return;
+    const result = await createApiKey.mutateAsync({ projectId: createdProject.id, label: "Default key" });
+    setNewApiKey(result.secret);
+  };
 
   return (
     <div className="min-h-screen bg-[#071014] text-slate-100 selection:bg-cyan-400/30">
@@ -76,7 +95,7 @@ export default function Home() {
             {active === "Security" && <div className="grid gap-3 md:grid-cols-3"><div className="rounded-xl border border-emerald-400/15 bg-emerald-400/[.04] p-4"><ShieldCheck className="mb-3 h-5 w-5 text-emerald-300" /><div className="text-sm text-slate-200">Secrets</div><div className="mt-1 text-xs text-slate-500">API keys são armazenadas apenas por hash no backend.</div></div><div className="rounded-xl border border-amber-400/15 bg-amber-400/[.04] p-4"><LockKeyhole className="mb-3 h-5 w-5 text-amber-300" /><div className="text-sm text-slate-200">Permissões</div><div className="mt-1 text-xs text-slate-500">Skills declaram permissões antes de executar.</div></div><div className="rounded-xl border border-violet-400/15 bg-violet-400/[.04] p-4"><GitBranch className="mb-3 h-5 w-5 text-violet-300" /><div className="text-sm text-slate-200">Proveniência</div><div className="mt-1 text-xs text-slate-500">Terceiros ficam em revisão até validação.</div></div></div>}
             {(active === "Providers" || active === "Tasks") && <div className="rounded-xl border border-white/8 bg-black/10 p-5 text-sm text-slate-400">Esta área já possui contrato e status no backend, mas ainda não há provider ou worker real habilitado. O sistema mostra essa limitação explicitamente para não criar uma falsa impressão de capacidade.</div>}
           </CardContent></Card>}
-          <section className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-[.2em] text-cyan-300"><CircleDot className="h-3 w-3" /> Control plane</div><h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">One API. <span className="text-slate-500">One ecosystem.</span></h1><p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-400">Uma camada segura para organizar capacidades de IA, conectar providers e evoluir suas skills sem perder controle de licenças ou proveniência.</p></div><Button className="w-fit gap-2 bg-cyan-300 text-[#061014] hover:bg-cyan-200"><Plus className="h-4 w-4" /> Criar projeto</Button></section>
+          <section className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-[.2em] text-cyan-300"><CircleDot className="h-3 w-3" /> Control plane</div><h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">One API. <span className="text-slate-500">One ecosystem.</span></h1><p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-400">Uma camada segura para organizar capacidades de IA, conectar providers e evoluir suas skills sem perder controle de licenças ou proveniência.</p></div><Button onClick={openProjectDialog} className="w-fit gap-2 bg-cyan-300 text-[#061014] hover:bg-cyan-200"><Plus className="h-4 w-4" /> Criar projeto</Button></section>
 
           <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><Card className="border-white/8 bg-white/[.035] shadow-none"><CardContent className="p-5"><div className="mb-5 flex items-center justify-between"><span className="text-xs text-slate-500">API status</span><StatusDot status="operational" /></div><div className="text-2xl font-semibold">Operational</div><div className="mt-1 text-xs text-slate-500">Última verificação agora</div></CardContent></Card><Card className="border-white/8 bg-white/[.035] shadow-none"><CardContent className="p-5"><div className="mb-5 flex items-center justify-between"><span className="text-xs text-slate-500">Capabilities</span><BrainCircuit className="h-4 w-4 text-violet-300" /></div><div className="text-2xl font-semibold">{capabilities.data?.length ?? 8}</div><div className="mt-1 text-xs text-slate-500">Contratos disponíveis</div></CardContent></Card><Card className="border-white/8 bg-white/[.035] shadow-none"><CardContent className="p-5"><div className="mb-5 flex items-center justify-between"><span className="text-xs text-slate-500">Skills</span><Sparkles className="h-4 w-4 text-cyan-300" /></div><div className="text-2xl font-semibold">{skills.data?.length ?? 4}</div><div className="mt-1 text-xs text-slate-500">Extensões catalogadas</div></CardContent></Card><Card className="border-white/8 bg-white/[.035] shadow-none"><CardContent className="p-5"><div className="mb-5 flex items-center justify-between"><span className="text-xs text-slate-500">Registry review</span><ShieldCheck className="h-4 w-4 text-amber-300" /></div><div className="text-2xl font-semibold">{registry.data?.filter(x => x.status === "review_required").length ?? 1}</div><div className="mt-1 text-xs text-slate-500">Itens aguardando validação</div></CardContent></Card></div>
 
@@ -86,8 +105,15 @@ export default function Home() {
 
           <section className="mt-6 grid gap-4 md:grid-cols-3"><Card className="border-white/8 bg-gradient-to-br from-cyan-300/10 to-transparent shadow-none"><CardContent className="p-5"><Code2 className="mb-5 h-5 w-5 text-cyan-300" /><h3 className="font-medium text-slate-100">API Builder</h3><p className="mt-2 text-xs leading-relaxed text-slate-500">Defina capabilities, permissões e limites em um único projeto.</p><button onClick={() => select("API Builder")} className="mt-4 flex items-center gap-1 text-xs text-cyan-300">Configurar <ChevronRight className="h-3.5 w-3.5" /></button></CardContent></Card><Card className="border-white/8 bg-gradient-to-br from-violet-300/10 to-transparent shadow-none"><CardContent className="p-5"><KeyRound className="mb-5 h-5 w-5 text-violet-300" /><h3 className="font-medium text-slate-100">Chaves seguras</h3><p className="mt-2 text-xs leading-relaxed text-slate-500">Acesso por projeto, sem segredos expostos no cliente.</p><button onClick={() => select("Security")} className="mt-4 flex items-center gap-1 text-xs text-violet-300">Revisar segurança <ChevronRight className="h-3.5 w-3.5" /></button></CardContent></Card><Card className="border-white/8 bg-gradient-to-br from-amber-300/10 to-transparent shadow-none"><CardContent className="p-5"><Database className="mb-5 h-5 w-5 text-amber-300" /><h3 className="font-medium text-slate-100">Proveniência</h3><p className="mt-2 text-xs leading-relaxed text-slate-500">Registro explícito de origem, versão, commit e alterações.</p><button onClick={() => select("Registry")} className="mt-4 flex items-center gap-1 text-xs text-amber-300">Abrir registry <ChevronRight className="h-3.5 w-3.5" /></button></CardContent></Card></section>
 
-          <footer className="mt-10 flex flex-col justify-between gap-3 border-t border-white/8 pt-5 text-[11px] text-slate-600 sm:flex-row"><span>Kazer Universal · private workspace · v0.1.0</span><span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Licenças e atribuições são tratadas separadamente</span></footer>
+          <footer className="mt-10 flex flex-col justify-between gap-3 border-t border-white/8 pt-5 text-[11px] text-slate-600 sm:flex-row"><span>Kazer Universal · public workspace · v0.1.0</span><span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Licenças e atribuições são tratadas separadamente</span></footer>
         </div>
+        <Dialog open={projectDialog} onOpenChange={setProjectDialog}>
+          <DialogContent className="border-white/10 bg-[#0b1a20] text-slate-100 sm:max-w-md">
+            <DialogHeader><DialogTitle>{createdProject ? "Projeto criado" : "Criar projeto Kazer"}</DialogTitle><DialogDescription className="text-slate-500">{createdProject ? "Agora gere uma API key. O segredo será mostrado somente uma vez." : "O projeto começa em development com as capabilities declaradas pelo Core."}</DialogDescription></DialogHeader>
+            {!createdProject ? <div className="space-y-3"><label className="text-xs text-slate-400">Nome do projeto</label><Input value={projectName} onChange={event => setProjectName(event.target.value)} placeholder="Meu aplicativo" className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-600" /><p className="text-[11px] text-slate-600">Projetos e chaves exigem login. Nenhum segredo é colocado no navegador antes da criação.</p></div> : <div className="space-y-4"><div className="rounded-lg border border-white/8 bg-black/20 p-3"><div className="text-[10px] uppercase tracking-wider text-slate-600">Project ID</div><div className="mt-1 font-mono text-sm text-cyan-200">{createdProject.projectId}</div></div>{newApiKey ? <div className="rounded-lg border border-amber-300/20 bg-amber-300/[.06] p-3"><div className="text-[10px] uppercase tracking-wider text-amber-300">Copie agora — não será exibida novamente</div><div className="mt-2 flex items-center gap-2"><code className="min-w-0 flex-1 break-all text-xs text-slate-200">{newApiKey}</code><Button size="icon" variant="outline" onClick={() => navigator.clipboard.writeText(newApiKey)} className="h-8 w-8 shrink-0 border-white/10 bg-transparent"><Copy className="h-3.5 w-3.5" /></Button></div></div> : <Button onClick={issueApiKey} disabled={createApiKey.isPending} className="w-full bg-cyan-300 text-[#061014] hover:bg-cyan-200">{createApiKey.isPending ? "Gerando..." : "Gerar API key"}</Button>}</div>}
+            <DialogFooter><Button variant="ghost" onClick={() => setProjectDialog(false)} className="text-slate-400 hover:bg-white/5 hover:text-white">Fechar</Button>{!createdProject && <Button onClick={submitProject} disabled={createProject.isPending || projectName.trim().length < 2} className="bg-cyan-300 text-[#061014] hover:bg-cyan-200">{createProject.isPending ? "Criando..." : "Criar projeto"}</Button>}</DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

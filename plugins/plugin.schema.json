@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Kazer Plugin Manifest",
+  "type": "object",
+  "required": ["name", "version", "capabilities", "dependencies", "permissions", "license", "entrypoint", "provenance"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string" },
+    "capabilities": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "dependencies": { "type": "array", "items": { "type": "string" } },
+    "permissions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "license": { "type": "string" },
+    "entrypoint": { "type": "string" },
+    "provenance": { "type": "object", "required": ["source", "classification"], "properties": { "source": { "type": "string" }, "classification": { "enum": ["core", "adapter", "embedded", "adapted", "external", "review_required"] } } }
+  },
+  "additionalProperties": false
+}

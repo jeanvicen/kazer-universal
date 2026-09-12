@@ -1,0 +1,20 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Kazer Universal API",
+    "version": "0.1.0",
+    "description": "Discovery API for the public Kazer Universal MVP. Capability execution is disabled until a provider is configured."
+  },
+  "paths": {
+    "/v1/health": { "get": { "responses": { "200": { "description": "Platform health" } } } },
+    "/v1/capabilities": { "get": { "responses": { "200": { "description": "Declared capabilities" } } } },
+    "/v1/registry": { "get": { "responses": { "200": { "description": "Registry entries with license and provenance metadata" } } } },
+    "/v1/skills": { "get": { "responses": { "200": { "description": "Declared skills" } } } },
+    "/v1/models": { "get": { "responses": { "200": { "description": "Configured models, empty in the MVP" } } } },
+    "/v1/providers": { "get": { "responses": { "200": { "description": "Configured providers, empty in the MVP" } } } },
+    "/v1/chat": { "post": { "responses": { "501": { "description": "No provider configured" } } } },
+    "/v1/reason": { "post": { "responses": { "501": { "description": "No provider configured" } } } },
+    "/v1/agent": { "post": { "responses": { "501": { "description": "No provider configured" } } } },
+    "/v1/image": { "post": { "responses": { "501": { "description": "No provider configured" } } } }
+  }
+}

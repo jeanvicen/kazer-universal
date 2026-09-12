@@ -4,18 +4,15 @@ Uma camada pública e extensível para organizar capabilities de IA, adapters, p
 
 > **Importante:** público não significa que todos os arquivos tenham a mesma licença. O código original do Kazer e os componentes de terceiros são mantidos separados e devem ser identificados individualmente.
 
-## O que existe nesta versão
+## O que está implementado
 
-- Dashboard responsivo e mobile-first.
-- API tipada com health, capabilities, registry e skills.
-- Registry inicial com origem, licença, status e proveniência.
-- Área de skills com versão, categoria, permissões e licença.
-- Política de contribuição, nota legal e avisos de terceiros.
-- Base de autenticação, banco e storage preparada pelo scaffold fullstack.
+O MVP possui dashboard responsivo, área de skills, registry com licença e proveniência, API tRPC, endpoints REST de descoberta, OpenAPI inicial, políticas formais de segurança/privacidade/modelos/open source, estrutura de monorepo e migração persistente para projetos e API keys. API keys são armazenadas somente por hash e o segredo é retornado apenas no momento da criação.
 
-## Princípio de incorporação
+As operações de execução (`chat`, `reason`, `agent`, `image` e outras) respondem explicitamente `501 capability_not_configured` enquanto nenhum provider autorizado estiver conectado. Isso é intencional: a API não finge que uma capacidade está pronta.
 
-Nenhum projeto é copiado apenas porque está no GitHub. A entrada deve passar por análise de licença, dependências, segurança, copyright e proveniência. Quando a redistribuição não estiver clara, o item permanece `external` ou `review_required`.
+## Estrutura
+
+As pastas `core`, `api`, `gateway`, `router`, `bus`, `memory`, `runtime`, `sdk`, `mobile`, `ecosystem`, `adapters`, `providers`, `models`, `plugins`, `registry`, `provenance` e `security` já existem como pontos de extensão. Nenhum código de terceiro é baixado automaticamente.
 
 ## Desenvolvimento
 
@@ -27,10 +24,12 @@ pnpm test
 pnpm build
 ```
 
-## Contribuições
+## Contribuições e licenças
 
-Consulte [`CONTRIBUTING.md`](./CONTRIBUTING.md), [`LEGAL_NOTICE.md`](./LEGAL_NOTICE.md) e [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md). Preserve sempre `LICENSE`, `NOTICE`, `COPYRIGHT`, autores, origem e restrições dos projetos incorporados.
+Consulte [`CONTRIBUTING.md`](./CONTRIBUTING.md), [`LICENSE`](./LICENSE), [`NOTICE`](./NOTICE), [`LEGAL_NOTICE.md`](./LEGAL_NOTICE.md), [`OPEN_SOURCE_POLICY.md`](./OPEN_SOURCE_POLICY.md), [`MODEL_POLICY.md`](./MODEL_POLICY.md), [`SECURITY.md`](./SECURITY.md), [`PRIVACY.md`](./PRIVACY.md), [`TERMS.md`](./TERMS.md) e [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).
 
-## Status
+Antes de incorporar um projeto, registre origem oficial, versão ou commit, licença, copyright, NOTICE, alterações e adapter. Na dúvida, use `external` ou `review_required`.
 
-Esta é uma primeira versão funcional de arquitetura e governança. Providers externos, workers, fila de tarefas e SDKs ainda devem ser adicionados de forma incremental, com revisão técnica e jurídica por componente.
+## Estado atual
+
+Esta é uma primeira versão funcional de arquitetura e governança. Providers reais, workers, fila de tarefas, SDKs completos, sandbox de agentes, MCP, memória persistente, Docker Compose e importador automatizado ainda precisam ser adicionados em fases separadas, com revisão técnica e jurídica por componente.

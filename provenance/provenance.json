@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "0.1.0",
+  "generatedAt": "2026-09-12",
+  "project": "kazer-universal",
+  "components": [
+    {
+      "name": "Kazer Core",
+      "classification": "core",
+      "upstream": null,
+      "repository": null,
+      "commitSha": null,
+      "release": "0.1.0",
+      "license": "Provisional Kazer notice; replace before distributable release",
+      "copyright": "Kazer Universal contributors",
+      "noticeFiles": ["LICENSE"],
+      "modifications": "Original project code",
+      "kazerAdapter": null,
+      "reviewStatus": "documented"
+    },
+    {
+      "name": "llama.cpp",
+      "classification": "review_required",
+      "upstream": "https://github.com/ggml-org/llama.cpp",
+      "repository": "https://github.com/ggml-org/llama.cpp",
+      "commitSha": null,
+      "release": null,
+      "license": "Verify at exact version before incorporation",
+      "copyright": "Upstream authors",
+      "noticeFiles": [],
+      "modifications": "Not incorporated",
+      "kazerAdapter": null,
+      "reviewStatus": "pending"
+    },
+    {
+      "name": "ComfyUI",
+      "classification": "external",
+      "upstream": "https://github.com/comfyanonymous/ComfyUI",
+      "repository": "https://github.com/comfyanonymous/ComfyUI",
+      "commitSha": null,
+      "release": null,
+      "license": "Verify at exact version before incorporation",
+      "copyright": "Upstream authors",
+      "noticeFiles": [],
+      "modifications": "Not incorporated",
+      "kazerAdapter": null,
+      "reviewStatus": "pending"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 export type RegistryStatus = "core" | "adapter" | "external" | "review_required";
+export type IntegrationState = "connected_adapter" | "adapter_available" | "linked_reference" | "review_required";
 
 export type RegistryItem = {
   id: string;
@@ -7,10 +8,14 @@ export type RegistryItem = {
   description: string;
   capability: string;
   status: RegistryStatus;
+  integrationState: IntegrationState;
   license: string;
+  licenseSource: string;
+  authors: string;
   source: string;
   provenance: string;
   note: string;
+  legalNote: string;
 };
 
 export type Skill = {
@@ -35,92 +40,36 @@ export const capabilities = [
   { id: "memory", label: "Memory", description: "Memória controlável" },
 ] as const;
 
+const linked = "linked_reference" as const;
+const external = "external" as const;
+const review = "review_required" as const;
+const kazer = "Código original do Kazer; nenhuma propriedade é reivindicada sobre projetos externos.";
+
 export const registryItems: RegistryItem[] = [
-  {
-    id: "kazer-core",
-    name: "Kazer Core",
-    category: "Platform",
-    description: "Interfaces, roteamento e contratos internos da plataforma.",
-    capability: "orchestration",
-    status: "core",
-    license: "Proprietary / Kazer",
-    source: "Kazer Universal",
-    provenance: "Código original do projeto; versão inicial.",
-    note: "Camada própria. Não representa propriedade sobre projetos de terceiros.",
-  },
-  {
-    id: "llama-cpp",
-    name: "llama.cpp",
-    category: "LLM runtime",
-    description: "Runtime local avaliado para inferência eficiente.",
-    capability: "chat",
-    status: "review_required",
-    license: "A confirmar no commit importado",
-    source: "https://github.com/ggml-org/llama.cpp",
-    provenance: "Somente referência registrada; nenhum código foi copiado nesta versão.",
-    note: "A incorporação só deve ocorrer após revisão de licença, avisos e dependências.",
-  },
-  {
-    id: "comfyui",
-    name: "ComfyUI",
-    category: "Image",
-    description: "Pipeline visual considerado para futuros adapters de imagem.",
-    capability: "image",
-    status: "external",
-    license: "A confirmar antes de redistribuir",
-    source: "https://github.com/comfyanonymous/ComfyUI",
-    provenance: "Integração externa planejada; não incluída no repositório.",
-    note: "Providers externos ficam isolados até validação jurídica e técnica.",
-  },
+  { id: "kazer-core", name: "Kazer Core", category: "Platform", description: "Interfaces, roteamento e contratos internos da plataforma.", capability: "orchestration", status: "core", integrationState: "connected_adapter", license: "Proprietary / Kazer", licenseSource: "LICENSE", authors: "Jean Vicence e contribuidores Kazer", source: "https://github.com/jeanvicen/kazer-universal", provenance: kazer, note: "Camada própria.", legalNote: "Consulte LICENSE e NOTICE do Kazer." },
+  { id: "foundationagents-openmanus", name: "OpenManus", category: "Agents / automation", description: "Framework modular para agentes gerais, ferramentas, MCP, navegador e fluxos multiagente.", capability: "agent", status: external, integrationState: linked, license: "MIT License", licenseSource: "https://raw.githubusercontent.com/FoundationAgents/OpenManus/main/LICENSE", authors: "FoundationAgents; Xinbing Liang, Jinyu Xiang e contribuidores", source: "https://github.com/FoundationAgents/OpenManus", provenance: "Referência oficial pesquisada; código não importado.", note: "Adapter futuro pode mapear agent, browser e MCP.", legalNote: "MIT exige preservar copyright/licença. Dependências, modelos, APIs e serviços externos têm termos próprios." },
+  { id: "openhands-openhands", name: "OpenHands", category: "Coding agents", description: "Agent Canvas e stack self-hosted para agentes de programação e automações de desenvolvimento.", capability: "agent", status: external, integrationState: linked, license: "MIT License", licenseSource: "https://github.com/OpenHands/OpenHands/blob/main/LICENSE", authors: "OpenHands contributors", source: "https://github.com/OpenHands/OpenHands", provenance: "Referência oficial pesquisada; conexão não ativa.", note: "Cloud, Agent Server e SDK têm limites e repositórios relacionados.", legalNote: "MIT cobre o repositório; serviços cloud, dependências e backends devem ser revisados separadamente." },
+  { id: "browser-use-browser-use", name: "Browser Use", category: "Browser automation", description: "Biblioteca Python e CLI para agentes navegarem e operarem websites.", capability: "browser", status: external, integrationState: linked, license: "MIT License", licenseSource: "https://raw.githubusercontent.com/browser-use/browser-use/main/LICENSE", authors: "Gregor Zunic e organização Browser Use", source: "https://github.com/browser-use/browser-use", provenance: "Referência oficial pesquisada; Browser Use Cloud não é presumido como integrado.", note: "Sites, dados, APIs e serviço cloud possuem termos próprios.", legalNote: "MIT preserva avisos; Cloud, modelos, sites acessados e dados não são cobertos automaticamente." },
+  { id: "langchain-ai-langgraph", name: "LangGraph", category: "Agent orchestration", description: "Runtime para workflows stateful, duráveis, com memória, streaming e human-in-the-loop.", capability: "orchestration", status: external, integrationState: linked, license: "MIT License", licenseSource: "https://github.com/langchain-ai/langgraph/blob/main/LICENSE", authors: "LangChain, Inc.", source: "https://github.com/langchain-ai/langgraph", provenance: "Referência oficial pesquisada; LangSmith não é presumido como conectado.", note: "Pode inspirar um adapter de grafos de execução.", legalNote: "MIT cobre o código; LangSmith, provedores, marcas e conteúdo têm termos próprios." },
+  { id: "modelcontextprotocol-servers", name: "MCP Servers", category: "MCP reference servers", description: "Servidores oficiais de referência para prompts, resources e tools do Model Context Protocol.", capability: "mcp", status: external, integrationState: linked, license: "Apache-2.0 / MIT / CC-BY-4.0 por material", licenseSource: "https://github.com/modelcontextprotocol/servers/blob/main/LICENSE", authors: "Model Context Protocol community; steering group", source: "https://github.com/modelcontextprotocol/servers", provenance: "Exemplos educacionais; nenhum servidor é tratado como pronto para produção.", note: "Cada servidor e arquivo deve ser revisado antes de redistribuir.", legalNote: "Licenciamento em transição e misto: Apache-2.0 para novas contribuições, MIT para código legado aplicável e CC-BY-4.0 para documentação não-especificação." },
+  { id: "comfy-org-comfyui", name: "ComfyUI", category: "Image / video workflows", description: "Engine modular de grafos para workflows de imagem, vídeo, áudio, 3D e texto.", capability: "image", status: review, integrationState: linked, license: "GPL-3.0", licenseSource: "https://github.com/Comfy-Org/ComfyUI/blob/master/LICENSE", authors: "Comfy Org e comunidade", source: "https://github.com/Comfy-Org/ComfyUI", provenance: "Referência oficial; código e custom nodes não importados.", note: "GPL e modelos/custom nodes exigem revisão antes de redistribuição.", legalNote: "GPL-3.0 traz obrigações de fonte correspondente, avisos, indicação de modificações e licença de derivados. Modelos, checkpoints e custom nodes podem ter licenças próprias." },
+  { id: "black-forest-labs-flux", name: "FLUX", category: "Image generation", description: "Modelos e runtime de geração/edição de imagens da Black Forest Labs.", capability: "image", status: review, integrationState: review, license: "Apache-2.0 para código/schnell; licença própria para dev", licenseSource: "https://github.com/black-forest-labs/flux/tree/main/model_licenses", authors: "Black Forest Labs", source: "https://github.com/black-forest-labs/flux", provenance: "Referência oficial pesquisada; pesos e API não conectados.", note: "FLUX.1 dev exige análise de uso comercial; schnell tem termos diferentes.", legalNote: "Não existe uma licença única para código e pesos. FLUX.1 dev é Non-Commercial; uso comercial/produtivo exige licença BFL. Verificar cada peso e restrição de outputs." },
+  { id: "hidream-i1", name: "HiDream-I1", category: "Image generation", description: "Modelo de geração text-to-image com variantes Full, Dev e Fast e demo Diffusers/Gradio.", capability: "image", status: external, integrationState: linked, license: "MIT; dependências/modelos terceiros separados", licenseSource: "https://github.com/HiDream-ai/HiDream-I1/blob/main/LICENSE", authors: "HiDream.ai e autores do relatório técnico", source: "https://github.com/HiDream-ai/HiDream-I1", provenance: "Referência oficial; modelo e dependências não instalados.", note: "O README cita dependência Llama própria, que deve ser licenciada separadamente.", legalNote: "MIT cobre o projeto conforme declarado; dependências como Llama, Diffusers e pesos terceiros não são automaticamente cobertas." },
+  { id: "invoke-ai-invokeai", name: "InvokeAI", category: "Creative image generation", description: "Plataforma local/self-hosted com Unified Canvas, nodes, boards, modelos e pipelines de imagem.", capability: "image", status: external, integrationState: linked, license: "Apache-2.0; componentes adicionais separados", licenseSource: "https://github.com/invoke-ai/InvokeAI/blob/main/LICENSE", authors: "Invoke AI, Lincoln Stein, Vic e comunidade", source: "https://github.com/invoke-ai/InvokeAI", provenance: "Referência oficial; sem adapter ativo.", note: "Modelos, embeddings, LoRAs e arquivos de licença devem ser avaliados individualmente.", legalNote: "Apache-2.0 exige avisos, licença e marcação de alterações. O repositório contém licenças adicionais para componentes/modelos específicos." },
+  { id: "qwen3", name: "Qwen3", category: "LLM / reasoning", description: "Família de LLMs open-weight para reasoning, tool use, código e multilíngue.", capability: "reasoning", status: "adapter", integrationState: "adapter_available", license: "Apache-2.0 para modelos; código não separado claramente", licenseSource: "https://github.com/QwenLM/Qwen3/blob/main/README.md", authors: "Qwen Team, Alibaba Cloud e coautores listados", source: "https://github.com/QwenLM/Qwen3", provenance: "Adapter OpenAI-compatible disponível; checkpoint e provider permanecem configuráveis pelo operador.", note: "Cada checkpoint e componente deve ser conferido antes de distribuir.", legalNote: "README declara Apache-2.0 para modelos open-weight; a ausência de licença separada na raiz impede presumir o mesmo para todo o código e artefatos." },
+  { id: "deepseek-ai-deepseek-r1", name: "DeepSeek-R1", category: "LLM / reasoning", description: "Modelos de raciocínio com variantes destiladas e foco em matemática, código e problemas complexos.", capability: "reasoning", status: "adapter", integrationState: "adapter_available", license: "MIT; modelos derivados preservam licenças upstream", licenseSource: "https://github.com/deepseek-ai/DeepSeek-R1/blob/main/LICENSE", authors: "DeepSeek-AI", source: "https://github.com/deepseek-ai/DeepSeek-R1", provenance: "Adapter compatível disponível; endpoint e identidade deepseek-reasoner são verificados, sem fallback silencioso.", note: "Variantes Qwen/Llama destiladas exigem revisão das licenças upstream.", legalNote: "MIT requer avisos; modelos destilados de Qwen e Llama carregam obrigações e termos adicionais próprios." },
+  { id: "openai-gpt-oss", name: "gpt-oss", category: "LLM / reasoning", description: "Modelos open-weight da OpenAI para reasoning, function calling, tools e contexto longo.", capability: "reasoning", status: external, integrationState: linked, license: "Apache-2.0 + USAGE_POLICY", licenseSource: "https://github.com/openai/gpt-oss/blob/main/LICENSE", authors: "OpenAI", source: "https://github.com/openai/gpt-oss", provenance: "Referência oficial; runtime/pesos não conectados.", note: "Uso exige seguir licença, política e leis aplicáveis.", legalNote: "Apache-2.0 exige preservação de avisos e não concede direitos de marca; USAGE_POLICY e lei aplicável continuam obrigatórios." },
+  { id: "ggml-org-llama-cpp", name: "llama.cpp", category: "LLM runtime", description: "Runtime C/C++ para inferência local de LLM/VLM, quantização e servidor compatível com OpenAI.", capability: "runtime", status: "adapter", integrationState: "adapter_available", license: "MIT License", licenseSource: "https://github.com/ggml-org/llama.cpp/blob/master/LICENSE", authors: "The ggml authors; ggml-org", source: "https://github.com/ggml-org/llama.cpp", provenance: "Adapter para llama-server disponível; nenhum GGUF, LoRA ou código externo é distribuído pelo Kazer.", note: "Modelos baixados do Hugging Face mantêm licenças próprias.", legalNote: "MIT cobre o runtime; pesos, marcas, dependências e modelos usados com ele devem ser avaliados separadamente." },
+  { id: "wan-video-wan22", name: "Wan2.2", category: "Video generation", description: "Modelos de vídeo T2V, I2V e TI2V-5B com arquitetura Mixture-of-Experts.", capability: "video", status: external, integrationState: linked, license: "Apache-2.0 + condições de uso do README", licenseSource: "https://github.com/Wan-Video/Wan2.2/blob/main/LICENSE.txt", authors: "Wan-Video Team e autores listados", source: "https://github.com/Wan-Video/Wan2.2", provenance: "Referência oficial; pesos/GPU não conectados.", note: "README traz restrições de conteúdo e responsabilidade de uso.", legalNote: "Apache-2.0 exige avisos e licença; o README traz condições adicionais contra usos ilegais, dano, dados pessoais e desinformação." },
+  { id: "lightricks-ltx-video-ltx-2", name: "LTX-Video / LTX-2", category: "Video / audio-video generation", description: "Modelos de vídeo e áudio+vídeo para T2V, I2V, keyframes, extensão e workflows ComfyUI.", capability: "video", status: review, integrationState: review, license: "Apache-2.0 no LTX-Video; licença comunitária própria no LTX-2", licenseSource: "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2", authors: "Lightricks Ltd. e comunidade", source: "https://github.com/Lightricks/LTX-Video", provenance: "LTX-2 é referência oficial relacionada; nenhum peso ou adapter conectado.", note: "Uso comercial e redistribuição dependem da versão e do acordo aplicável.", legalNote: "Não presumir Apache para LTX-2: as licenças comunitárias têm escopo, limites comerciais, redistribuição e regras de derivados próprios. Revisão obrigatória." },
 ];
 
 export const skills: Skill[] = [
-  {
-    id: "safe-chat",
-    name: "Safe Chat",
-    summary: "Respostas textuais com validação de entrada e limites de uso.",
-    category: "Core",
-    version: "0.1.0",
-    status: "ready",
-    permissions: ["chat"],
-    license: "Proprietary / Kazer",
-  },
-  {
-    id: "license-review",
-    name: "License Review",
-    summary: "Checklist para classificar componentes antes de importar código ou pesos.",
-    category: "Governance",
-    version: "0.1.0",
-    status: "ready",
-    permissions: ["registry:read", "provenance:write"],
-    license: "Proprietary / Kazer",
-  },
-  {
-    id: "agent-sandbox",
-    name: "Agent Sandbox",
-    summary: "Contrato de permissões para ferramentas de agentes, sem acesso irrestrito.",
-    category: "Security",
-    version: "0.1.0",
-    status: "planned",
-    permissions: ["tasks:run", "filesystem:scoped"],
-    license: "Proprietary / Kazer",
-  },
-  {
-    id: "provider-adapter",
-    name: "Provider Adapter",
-    summary: "Modelo de extensão para conectar providers sem alterar o Core.",
-    category: "Extensions",
-    version: "0.1.0",
-    status: "review",
-    permissions: ["provider:register", "capabilities:declare"],
-    license: "Proprietary / Kazer",
-  },
+  { id: "safe-chat", name: "Safe Chat", summary: "Respostas textuais com validação de entrada e limites de uso.", category: "Core", version: "0.1.0", status: "ready", permissions: ["chat"], license: "Proprietary / Kazer" },
+  { id: "license-review", name: "License Review", summary: "Checklist para classificar componentes antes de importar código ou pesos.", category: "Governance", version: "0.1.0", status: "ready", permissions: ["registry:read", "provenance:write"], license: "Proprietary / Kazer" },
+  { id: "repository-intake", name: "Repository Intake", summary: "Inspeciona links de repositórios sem executar código e devolve skills, licenças e riscos para revisão.", category: "Governance", version: "0.1.0", status: "ready", permissions: ["registry:read", "provenance:write", "network:metadata"], license: "Proprietary / Kazer" },
+  { id: "agent-sandbox", name: "Agent Sandbox", summary: "Contrato de permissões para ferramentas de agentes, sem acesso irrestrito.", category: "Security", version: "0.1.0", status: "planned", permissions: ["tasks:run", "filesystem:scoped"], license: "Proprietary / Kazer" },
+  { id: "provider-adapter", name: "Provider Adapter", summary: "Modelo de extensão para conectar providers sem alterar o Core.", category: "Extensions", version: "0.1.0", status: "review", permissions: ["provider:register", "capabilities:declare"], license: "Proprietary / Kazer" },
 ];
 
-export const platformHealth = {
-  api: "operational",
-  router: "operational",
-  registry: "operational",
-  workers: "planned",
-  providers: "review",
-} as const;
+export const platformHealth = { api: "operational", router: "operational", registry: "operational", workers: "planned", providers: "review" } as const;

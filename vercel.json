@@ -4,6 +4,7 @@
   "buildCommand": "pnpm build",
   "outputDirectory": "dist/public",
   "rewrites": [
+    { "source": "/v1/health", "destination": "/api/health" },
     { "source": "/v1/:path*", "destination": "/api/index" },
     { "source": "/api/trpc", "destination": "/api/index" },
     { "source": "/api/trpc/:path*", "destination": "/api/index" },

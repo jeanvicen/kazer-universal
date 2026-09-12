@@ -45,6 +45,19 @@ button { transition: transform 160ms ease-out, background-color 160ms ease-out, 
 button:active { transform: scale(.97); }
 ::selection { background: rgba(103,232,249,.25); }
 ::selection { color: #f7ffff; }
+@media (prefers-reduced-motion: no-preference) {
+  .motion-reveal { animation: kazer-reveal .7s cubic-bezier(.23,1,.32,1) both; }
+  .motion-delay-1 { animation-delay: 80ms; }
+  .motion-delay-2 { animation-delay: 160ms; }
+  .motion-delay-3 { animation-delay: 240ms; }
+  .motion-lift { transition: transform 220ms cubic-bezier(.23,1,.32,1), border-color 220ms ease, background-color 220ms ease, box-shadow 220ms ease; }
+  .motion-lift:hover { transform: translateY(-5px); border-color: rgba(103,232,249,.32); background-color: rgba(103,232,249,.035); box-shadow: 0 18px 50px rgba(0,0,0,.28), 0 0 28px rgba(0,220,255,.06); }
+  .motion-image { transition: transform 700ms cubic-bezier(.23,1,.32,1), opacity 400ms ease; }
+  .motion-card:hover .motion-image { transform: scale(1.06); opacity: .92; }
+  .motion-arrow { transition: transform 180ms cubic-bezier(.23,1,.32,1); }
+  .motion-card:hover .motion-arrow { transform: translateX(4px); }
+  @keyframes kazer-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+}
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: #050708; }
 ::-webkit-scrollbar-thumb { background: #1b3036; border-radius: 999px; }

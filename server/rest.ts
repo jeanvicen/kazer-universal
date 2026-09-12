@@ -3,6 +3,9 @@ import { invokeLLM, listLLMModels, type Message } from "./_core/llm";
 import { capabilities, platformHealth, registryItems, skills } from "./registry";
 import { cancelTask, enqueueChatTask, getTask } from "../runtime/taskQueue";
 import { validateApiKey } from "./db";
+import { inspectPublicRepository } from "./repositoryIntake";
+import { chatWithAdapter, healthAdapter, publicAdapterCatalog } from "./adapters";
+import type { AdapterId } from "./adapters/types";
 
 function jsonError(res: Response, status: number, code: string, message: string) {
   return res.status(status).json({ error: { code, message } });
@@ -48,6 +51,36 @@ export function registerRestRoutes(app: Express) {
     catch { return res.json({ object: "list", data: [], notice: "No model catalog is available in the current environment." }); }
   });
   app.get("/v1/providers", (_req, res) => res.json({ data: [{ id: "manus-forge", type: "llm", status: "configured", attribution: "Manus built-in LLM integration" }] }));
+  app.get("/v1/adapters", (_req, res) => res.json({ data: publicAdapterCatalog() }));
+  app.get("/v1/adapters/:id/health", async (req, res) => {
+    const id = req.params.id as AdapterId;
+    if (!["llama-cpp", "qwen3", "deepseek-r1"].includes(id)) return jsonError(res, 404, "adapter_not_found", "Unknown Kazer adapter.");
+    return res.json({ data: await healthAdapter(id) });
+  });
+  app.post("/v1/adapters/:id/chat", async (req, res) => {
+    if (!requireObjectBody(req, res) || !await authorizeExecution(req, res)) return;
+    const id = req.params.id as AdapterId;
+    if (!["llama-cpp", "qwen3", "deepseek-r1"].includes(id)) return jsonError(res, 404, "adapter_not_found", "Unknown Kazer adapter.");
+    try {
+      const result = await chatWithAdapter(id, req.body);
+      return res.json(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "adapter_request_failed";
+      const status = message === "adapter_not_configured" ? 501 : message.startsWith("adapter_upstream_") ? 502 : 400;
+      return jsonError(res, status, message.split(":")[0], status === 501 ? "This adapter is not configured in the current environment." : "The adapter rejected or could not complete the request.");
+    }
+  });
+  app.post("/v1/repository/inspect", async (req, res) => {
+    const url = typeof req.body?.url === "string" ? req.body.url.trim() : "";
+    if (!url) return jsonError(res, 400, "invalid_request", "A public GitHub repository URL is required.");
+    try {
+      return res.json({ data: await inspectPublicRepository(url) });
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "repository_inspection_failed";
+      const status = ["repository_url_invalid", "repository_host_not_allowed", "repository_path_invalid"].includes(code) ? 400 : 502;
+      return jsonError(res, status, code, status === 400 ? "Only a valid HTTPS GitHub repository URL is accepted." : "The public repository metadata could not be inspected.");
+    }
+  });
 
   const chatHandler = async (req: Request, res: Response, openAiFormat = false) => {
     if (!requireObjectBody(req, res)) return;

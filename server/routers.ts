@@ -5,6 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { createApiKeyForProject, createProjectForUser, listProjectsForUser, revokeApiKey } from "./db";
 import { capabilities, platformHealth, registryItems, skills } from "./registry";
+import { inspectPublicRepository } from "./repositoryIntake";
 
 const environment = z.enum(["development", "staging", "production"]);
 
@@ -23,6 +24,7 @@ export const appRouter = router({
     capabilities: publicProcedure.query(() => capabilities),
     registry: publicProcedure.query(() => registryItems),
     skills: publicProcedure.query(() => skills),
+    inspectRepository: publicProcedure.input(z.object({ url: z.string().url().max(500) })).mutation(({ input }) => inspectPublicRepository(input.url)),
   }),
   workspace: router({
     projects: protectedProcedure.query(({ ctx }) => listProjectsForUser(ctx.user.id)),

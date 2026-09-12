@@ -10,6 +10,17 @@
 | GET | `/v1/skills` | Implementado |
 | GET | `/v1/models` | Implementado usando o catálogo LLM disponível |
 | GET | `/v1/providers` | Implementado com status do provider configurado |
+| GET | `/v1/adapters` | Catálogo público de llama.cpp, Qwen3 e DeepSeek-R1 sem segredos |
+| GET | `/v1/adapters/:id/health` | Health e verificação da identidade do modelo configurado |
+| POST | `/v1/adapters/:id/chat` | Chat real protegido por API key quando o banco está ativo |
+
+## Intake seguro de repositórios
+
+`POST /v1/repository/inspect` aceita `{ "url": "https://github.com/owner/repository" }` e lê somente metadados públicos de um repositório GitHub: README, arquivos de licença e manifestos textuais nas branches `main` ou `master`. A resposta sugere `declaredSkills` e `capabilities` por sinais documentais e informa as fontes lidas.
+
+O endpoint aceita apenas URLs HTTPS do GitHub, não clona nem executa código externo, não instala dependências e não habilita permissões automaticamente. Skills, pesos, dependências, APIs, marcas e serviços cloud permanecem sujeitos a revisão humana e às licenças próprias. O objetivo é permitir que uma IA consulte o catálogo do Kazer e avalie compatibilidade sem transformar um link externo em execução irrestrita.
+
+Os adapters são configurados por ambiente; veja [`docs/ADAPTERS.md`](./ADAPTERS.md). O código não inclui pesos nem executa runtimes externos. Um adapter sem URL retorna `not_configured`, e um modelo que não aparece em `/v1/models` retorna `degraded` em vez de ser substituído silenciosamente.
 
 ## Chat
 

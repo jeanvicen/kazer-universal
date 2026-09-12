@@ -17,6 +17,11 @@
   <a href="./CONTRIBUTING.md">Contributing</a>
 </p>
 
+![Build](https://github.com/jeanvicen/kazer-universal/actions/workflows/build.yml/badge.svg?branch=main)
+![Tests](https://github.com/jeanvicen/kazer-universal/actions/workflows/test.yml/badge.svg?branch=main)
+![Latest release](https://img.shields.io/github/v/release/jeanvicen/kazer-universal?display_name=tag&sort=semver)
+![License](https://img.shields.io/badge/license-see%20LICENSE-111827)
+
 ![Kazer Open Source Universal — guardian hero](./assets/brand/kazer-hero-statue.jpg)
 
 > **Kazer Open Source Universal** organizes AI capabilities, adapters, providers and skills behind a single, auditable interface. The project is designed to make open-source integration powerful without hiding ownership, licenses, provenance or operational boundaries.
@@ -57,6 +62,10 @@ The app presents the routing model visually: a prompt enters through one surface
 
 Skills are catalogued separately from third-party projects. Registry entries carry category, capability, status, license, source, provenance and an explicit note about whether code has actually been imported. This prevents a public repository from implying ownership over external work.
 
+The current registry also includes verified references for **OpenManus, OpenHands, Browser Use, LangGraph, MCP Servers, ComfyUI, FLUX, HiDream-I1, InvokeAI, Qwen3, DeepSeek-R1, gpt-oss, llama.cpp, Wan2.2 and LTX-Video/LTX-2**. Each entry keeps its upstream repository, authors, license source and legal caveats. `connected_adapter`, `adapter_available`, `linked_reference` and `review_required` are deliberately separate states. Official Kazer transport adapters are now available for llama.cpp, Qwen3 and DeepSeek-R1; operators connect their own authorized runtimes through server-side environment variables.
+
+The **Safe Repository Intake** accepts a public GitHub URL and reads only text metadata such as README, license files and manifests. It suggests documented skills and capabilities for the Kazer catalog, but never clones, installs or executes external code. This lets an AI inspect a repository through the Kazer surface without granting it unrestricted permissions.
+
 ![Kazer guardian in orbit](./assets/brand/kazer-guardian-orbit.jpg)
 
 ## What works today
@@ -68,6 +77,8 @@ Skills are catalogued separately from third-party projects. Registry entries car
 - REST discovery endpoints for health, capabilities, registry and skills.
 - Server-side chat through the configured LLM provider.
 - OpenAI-compatible chat endpoint.
+- Official adapter transport for llama.cpp, Qwen3 and DeepSeek-R1 with health checks and exact model identity validation.
+- Adapter configuration with bounded request size, timeout, output tokens and server-side bearer credentials.
 - API key authentication for execution routes when the database is configured.
 - Project creation with environment and capability selection.
 - Hashed API key persistence; plaintext secrets are returned only at creation time.
@@ -99,6 +110,10 @@ curl http://localhost:3000/v1/skills
 ```
 
 See [`docs/API.md`](./docs/API.md) for the current endpoint contract and [`docs/SDK.md`](./docs/SDK.md) for SDK examples.
+
+See [`docs/ADAPTERS.md`](./docs/ADAPTERS.md) for adapter setup, upstream license boundaries, health checks and production security requirements.
+
+Repository inspection is available through `POST /v1/repository/inspect` and the typed `platform.inspectRepository` procedure. The endpoint accepts only HTTPS GitHub repository URLs and returns evidence, warnings and a clear `executedExternalCode: false` marker.
 
 ## Architecture at a glance
 

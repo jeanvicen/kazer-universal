@@ -62,7 +62,7 @@ export default function Home() {
         <nav className="space-y-1">
           {nav.map(({ label, icon: Icon }) => <button key={label} onClick={() => select(label)} className={cn("flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors", active === label ? "bg-cyan-300/10 text-cyan-200" : "text-slate-400 hover:bg-white/5 hover:text-slate-200")}><Icon className="h-4 w-4" />{label}{label === "Skills" && <Badge className="ml-auto border-0 bg-cyan-300/15 px-1.5 text-[10px] text-cyan-300">4</Badge>}</button>)}
         </nav>
-        <div className="absolute bottom-5 left-5 right-5 rounded-xl border border-white/8 bg-white/[.025] p-3"><div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-300"><LockKeyhole className="h-3.5 w-3.5 text-emerald-400" /> Private workspace</div><p className="text-[11px] leading-relaxed text-slate-500">Seu código e credenciais não são públicos. Componentes externos ficam em revisão.</p></div>
+        <div className="absolute bottom-5 left-5 right-5 rounded-xl border border-white/8 bg-white/[.025] p-3"><div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-300"><LockKeyhole className="h-3.5 w-3.5 text-emerald-400" /> Public workspace</div><p className="text-[11px] leading-relaxed text-slate-500">Contribuições são bem-vindas. Licenças e créditos continuam separados e visíveis.</p></div>
       </aside>
 
       <main className="lg:pl-64">

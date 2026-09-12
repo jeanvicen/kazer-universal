@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { createHash, randomBytes } from "node:crypto";
 import { nanoid } from "nanoid";
@@ -97,4 +97,16 @@ export async function revokeApiKey(ownerId: number, keyId: number) {
   if (!owned[0]) throw new Error("API key not found");
   await db.update(apiKeys).set({ revokedAt: new Date() }).where(eq(apiKeys.id, keyId));
   return { success: true as const };
+}
+
+export async function validateApiKey(secret: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const keyHash = createHash("sha256").update(secret).digest("hex");
+  const rows = await db.select({ projectId: apiKeys.projectId, capabilities: projects.capabilities })
+    .from(apiKeys)
+    .innerJoin(projects, eq(apiKeys.projectId, projects.id))
+    .where(and(eq(apiKeys.keyHash, keyHash), isNull(apiKeys.revokedAt)))
+    .limit(1);
+  return rows[0] ? { projectId: rows[0].projectId, capabilities: JSON.parse(rows[0].capabilities) as string[] } : null;
 }

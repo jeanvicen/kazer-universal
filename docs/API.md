@@ -8,17 +8,17 @@
 | GET | `/v1/capabilities` | Implementado |
 | GET | `/v1/registry` | Implementado |
 | GET | `/v1/skills` | Implementado |
-| GET | `/v1/models` | Implementado; retorna lista vazia até provider ser configurado |
-| GET | `/v1/providers` | Implementado; retorna lista vazia até provider ser configurado |
+| GET | `/v1/models` | Implementado usando o catálogo LLM disponível |
+| GET | `/v1/providers` | Implementado com status do provider configurado |
 
-## Operações declaradas
+## Chat
 
-Os endpoints `POST /v1/chat`, `/v1/reason`, `/v1/agent`, `/v1/search`, `/v1/vision`, `/v1/image`, `/v1/video`, `/v1/audio`, `/v1/speech`, `/v1/embed`, `/v1/code`, `/v1/tools` e `/v1/mcp` já possuem contrato HTTP e validação básica de JSON, mas respondem `501 capability_not_configured` enquanto não houver um provider autorizado e configurado.
+`POST /v1/chat` aceita `{ "prompt": "..." }` ou uma lista `messages` e executa o helper LLM server-side, sem expor credenciais no navegador. `POST /v1/chat/completions` devolve o formato compatível com clientes OpenAI.
 
-Isso é intencional: a API não finge que uma capacidade está pronta quando nenhum modelo, worker ou provider real foi conectado.
+## Tasks
 
-## Workspace autenticado
+`POST /v1/tasks` cria um job assíncrono de chat e retorna `202` com `task_id`. `GET /v1/tasks/:id` acompanha status, progresso, resultado e erro. `DELETE /v1/tasks/:id` tenta cancelar tarefas ainda não concluídas. Esta fila é um runtime inicial em memória; para produção, deve ser substituída por fila persistente com retry, timeout, auditoria e workers separados.
 
-A camada tRPC possui procedimentos autenticados para listar e criar projetos, gerar uma API key mostrada uma única vez e revogar uma key. O segredo não é salvo em texto puro; apenas o hash SHA-256 é persistido.
+## Capacidades ainda não configuradas
 
-Antes de expor essas operações em REST público, adicionar rate limiting, auditoria, rotação segura, expiração, escopos por capability e uma política de recuperação de conta.
+Os endpoints `POST /v1/reason`, `/v1/agent`, `/v1/search`, `/v1/vision`, `/v1/image`, `/v1/video`, `/v1/audio`, `/v1/speech`, `/v1/embed`, `/v1/code`, `/v1/tools` e `/v1/mcp` respondem `501 capability_not_configured` enquanto não houver um provider autorizado e configurado.

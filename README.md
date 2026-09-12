@@ -6,9 +6,9 @@ Uma camada pública e extensível para organizar capabilities de IA, adapters, p
 
 ## O que está implementado
 
-O MVP possui dashboard responsivo, área de skills, registry com licença e proveniência, API tRPC, endpoints REST de descoberta, OpenAPI inicial, políticas formais de segurança/privacidade/modelos/open source, estrutura de monorepo e migração persistente para projetos e API keys. API keys são armazenadas somente por hash e o segredo é retornado apenas no momento da criação.
+O MVP possui dashboard responsivo, área de skills, registry com licença e proveniência, API tRPC, endpoints REST de descoberta, chat server-side real via integração LLM, endpoint OpenAI-compatible, tasks assíncronas iniciais, SDKs TypeScript/Python/Flutter, Docker Compose, OpenAPI inicial, políticas formais de segurança/privacidade/modelos/open source, estrutura de monorepo e migração persistente para projetos e API keys. API keys são armazenadas somente por hash e o segredo é retornado apenas no momento da criação.
 
-As operações de execução (`chat`, `reason`, `agent`, `image` e outras) respondem explicitamente `501 capability_not_configured` enquanto nenhum provider autorizado estiver conectado. Isso é intencional: a API não finge que uma capacidade está pronta.
+Chat está habilitado server-side pelo provider LLM configurado no ambiente e exige Bearer API key quando o banco está ativo. As operações (`reason`, `agent`, `image` e outras) respondem explicitamente `501 capability_not_configured` enquanto nenhum provider autorizado estiver conectado. Isso é intencional: a API não finge que uma capacidade está pronta.
 
 ## Estrutura
 
@@ -32,4 +32,4 @@ Antes de incorporar um projeto, registre origem oficial, versão ou commit, lice
 
 ## Estado atual
 
-Esta é uma primeira versão funcional de arquitetura e governança. Providers reais, workers, fila de tarefas, SDKs completos, sandbox de agentes, MCP, memória persistente, Docker Compose e importador automatizado ainda precisam ser adicionados em fases separadas, com revisão técnica e jurídica por componente.
+Esta é uma primeira versão funcional de arquitetura, governança e chat. A fila ainda é em memória e perde jobs ao reiniciar; workers especializados, SDKs empacotados para distribuição, sandbox de agentes, MCP, memória persistente, observabilidade avançada e importador com scanners completos ainda precisam de fases separadas, com revisão técnica e jurídica por componente.

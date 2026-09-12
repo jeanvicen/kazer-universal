@@ -31,8 +31,18 @@ describe("REST discovery API", () => {
     expect((await capabilities.json()).data).toEqual(expect.arrayContaining([expect.objectContaining({ id: "chat" })]));
   });
 
-  it("does not pretend execution is available without a provider", async () => {
+  it("protects chat execution with an API key", async () => {
     const response = await fetch(`${baseUrl}/v1/chat`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    expect(response.status).toBe(401);
+    expect((await response.json()).error.code).toBe("missing_api_key");
+  });
+
+  it("keeps unconfigured capabilities explicit", async () => {
+    const response = await fetch(`${baseUrl}/v1/image`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ prompt: "hello" }),

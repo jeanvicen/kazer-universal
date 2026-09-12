@@ -1,32 +1,86 @@
+import { useMemo, useState } from "react";
+import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { startLogin } from "@/const";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from 'streamdown';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import {
+  Activity, ArrowUpRight, Boxes, BrainCircuit, CheckCircle2, ChevronRight,
+  CircleDot, Code2, Command, Database, GitBranch, KeyRound, Layers3,
+  LockKeyhole, Menu, Network, Plus, Search, ShieldCheck, Sparkles, X,
+} from "lucide-react";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
+const nav = [
+  { label: "Overview", icon: Activity },
+  { label: "API Builder", icon: Command },
+  { label: "Skills", icon: Sparkles },
+  { label: "Registry", icon: Boxes },
+  { label: "Providers", icon: Network },
+  { label: "Tasks", icon: Layers3 },
+  { label: "Security", icon: ShieldCheck },
+];
+
+const colors: Record<string, string> = {
+  Core: "bg-cyan-400/10 text-cyan-300 border-cyan-400/20",
+  Governance: "bg-violet-400/10 text-violet-300 border-violet-400/20",
+  Security: "bg-amber-400/10 text-amber-300 border-amber-400/20",
+  Extensions: "bg-emerald-400/10 text-emerald-300 border-emerald-400/20",
+};
+
+function StatusDot({ status }: { status: string }) {
+  const isGood = status === "operational" || status === "ready" || status === "core";
+  return <span className={cn("inline-block h-2 w-2 rounded-full", isGood ? "bg-emerald-400" : "bg-amber-400")} />;
+}
+
 export default function Home() {
-  // The useAuth hook provides authentication state.
-  // To implement login/logout, call logout(), or start login from an event
-  // handler: onClick={() => startLogin()} (imported from "@/const"). Never call
-  // startLogin() during render (no href={startLogin()}) — it mints a one-time
-  // nonce cookie and must run only at the moment of navigation.
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
+  const [active, setActive] = useState("Overview");
+  const [query, setQuery] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const registry = trpc.platform.registry.useQuery();
+  const skills = trpc.platform.skills.useQuery();
+  const health = trpc.platform.health.useQuery();
+  const capabilities = trpc.platform.capabilities.useQuery();
+  const filteredRegistry = useMemo(() => registry.data?.filter(item =>
+    `${item.name} ${item.category} ${item.capability}`.toLowerCase().includes(query.toLowerCase())
+  ) ?? [], [registry.data, query]);
 
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
+  const select = (label: string) => { setActive(label); setMobileOpen(false); };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
+    <div className="min-h-screen bg-[#071014] text-slate-100 selection:bg-cyan-400/30">
+      <aside className={cn("fixed inset-y-0 left-0 z-40 w-64 border-r border-white/8 bg-[#081419] p-5 transition-transform lg:translate-x-0", mobileOpen ? "translate-x-0" : "-translate-x-full")}>
+        <div className="mb-10 flex items-center justify-between px-2">
+          <div className="flex items-center gap-3"><div className="grid h-9 w-9 place-items-center rounded-xl bg-cyan-300 text-[#061014] shadow-[0_0_24px_rgba(103,232,249,.25)]"><Sparkles className="h-5 w-5" /></div><div><div className="font-semibold tracking-tight">Kazer</div><div className="text-[10px] uppercase tracking-[.22em] text-slate-500">Universal</div></div></div>
+          <button className="lg:hidden text-slate-400" onClick={() => setMobileOpen(false)}><X className="h-5 w-5" /></button>
+        </div>
+        <div className="mb-3 px-2 text-[10px] font-medium uppercase tracking-[.2em] text-slate-600">Workspace</div>
+        <nav className="space-y-1">
+          {nav.map(({ label, icon: Icon }) => <button key={label} onClick={() => select(label)} className={cn("flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors", active === label ? "bg-cyan-300/10 text-cyan-200" : "text-slate-400 hover:bg-white/5 hover:text-slate-200")}><Icon className="h-4 w-4" />{label}{label === "Skills" && <Badge className="ml-auto border-0 bg-cyan-300/15 px-1.5 text-[10px] text-cyan-300">4</Badge>}</button>)}
+        </nav>
+        <div className="absolute bottom-5 left-5 right-5 rounded-xl border border-white/8 bg-white/[.025] p-3"><div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-300"><LockKeyhole className="h-3.5 w-3.5 text-emerald-400" /> Private workspace</div><p className="text-[11px] leading-relaxed text-slate-500">Seu código e credenciais não são públicos. Componentes externos ficam em revisão.</p></div>
+      </aside>
+
+      <main className="lg:pl-64">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/8 bg-[#071014]/90 px-4 backdrop-blur-xl sm:px-8"><div className="flex items-center gap-3"><button className="lg:hidden text-slate-400" onClick={() => setMobileOpen(true)}><Menu className="h-5 w-5" /></button><div className="text-sm text-slate-500">Workspace / <span className="text-slate-200">{active}</span></div></div><div className="flex items-center gap-3"><div className="hidden items-center gap-2 rounded-lg border border-white/8 bg-white/[.03] px-3 py-1.5 text-xs text-slate-500 sm:flex"><Search className="h-3.5 w-3.5" /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar registry..." className="w-32 bg-transparent outline-none placeholder:text-slate-600" /></div>{isAuthenticated ? <Button variant="ghost" size="sm" onClick={() => logout()} className="text-xs text-slate-400 hover:bg-white/5 hover:text-white">Sair</Button> : <Button size="sm" onClick={() => startLogin()} className="bg-cyan-300 text-[#061014] hover:bg-cyan-200">Entrar</Button>}<div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-cyan-300 to-violet-400 text-xs font-bold text-[#071014]">{user?.name?.[0] ?? "K"}</div></div></header>
+
+        <div className="mx-auto max-w-7xl p-4 sm:p-8">
+          <section className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-[.2em] text-cyan-300"><CircleDot className="h-3 w-3" /> Control plane</div><h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">One API. <span className="text-slate-500">One ecosystem.</span></h1><p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-400">Uma camada segura para organizar capacidades de IA, conectar providers e evoluir suas skills sem perder controle de licenças ou proveniência.</p></div><Button className="w-fit gap-2 bg-cyan-300 text-[#061014] hover:bg-cyan-200"><Plus className="h-4 w-4" /> Criar projeto</Button></section>
+
+          <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><Card className="border-white/8 bg-white/[.035] shadow-none"><CardContent className="p-5"><div className="mb-5 flex items-center justify-between"><span className="text-xs text-slate-500">API status</span><StatusDot status="operational" /></div><div className="text-2xl font-semibold">Operational</div><div className="mt-1 text-xs text-slate-500">Última verificação agora</div></CardContent></Card><Card className="border-white/8 bg-white/[.035] shadow-none"><CardContent className="p-5"><div className="mb-5 flex items-center justify-between"><span className="text-xs text-slate-500">Capabilities</span><BrainCircuit className="h-4 w-4 text-violet-300" /></div><div className="text-2xl font-semibold">{capabilities.data?.length ?? 8}</div><div className="mt-1 text-xs text-slate-500">Contratos disponíveis</div></CardContent></Card><Card className="border-white/8 bg-white/[.035] shadow-none"><CardContent className="p-5"><div className="mb-5 flex items-center justify-between"><span className="text-xs text-slate-500">Skills</span><Sparkles className="h-4 w-4 text-cyan-300" /></div><div className="text-2xl font-semibold">{skills.data?.length ?? 4}</div><div className="mt-1 text-xs text-slate-500">Extensões catalogadas</div></CardContent></Card><Card className="border-white/8 bg-white/[.035] shadow-none"><CardContent className="p-5"><div className="mb-5 flex items-center justify-between"><span className="text-xs text-slate-500">Registry review</span><ShieldCheck className="h-4 w-4 text-amber-300" /></div><div className="text-2xl font-semibold">{registry.data?.filter(x => x.status === "review_required").length ?? 1}</div><div className="mt-1 text-xs text-slate-500">Itens aguardando validação</div></CardContent></Card></div>
+
+          <div className="grid gap-6 xl:grid-cols-[1.35fr_.65fr]"><Card className="border-white/8 bg-white/[.035] shadow-none"><CardHeader className="flex-row items-center justify-between border-b border-white/8 px-5 py-4"><div><CardTitle className="text-base text-slate-100">Registry & provenance</CardTitle><p className="mt-1 text-xs text-slate-500">Nada entra no Core sem status, licença e origem</p></div><Button variant="ghost" size="sm" onClick={() => select("Registry")} className="gap-1 text-xs text-cyan-300 hover:bg-cyan-300/10 hover:text-cyan-200">Ver tudo <ArrowUpRight className="h-3.5 w-3.5" /></Button></CardHeader><ScrollArea className="h-[330px]"><CardContent className="p-0">{filteredRegistry.map(item => <div key={item.id} className="flex items-start gap-4 border-b border-white/6 px-5 py-4 last:border-0"><div className="mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/5"><GitBranch className="h-4 w-4 text-slate-400" /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><span className="text-sm font-medium text-slate-200">{item.name}</span><Badge variant="outline" className="border-white/10 text-[10px] text-slate-500">{item.category}</Badge></div><p className="mt-1 text-xs leading-relaxed text-slate-500">{item.description}</p><div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-slate-600"><span className="flex items-center gap-1"><StatusDot status={item.status} /> {item.status.replace("_", " ")}</span><span>{item.license}</span></div></div><ChevronRight className="mt-2 h-4 w-4 text-slate-700" /></div>)}</CardContent></ScrollArea></Card>
+
+            <Card className="border-white/8 bg-white/[.035] shadow-none"><CardHeader className="border-b border-white/8 px-5 py-4"><div className="flex items-center justify-between"><div><CardTitle className="text-base text-slate-100">Skills</CardTitle><p className="mt-1 text-xs text-slate-500">Extensões prontas para crescer</p></div><Button variant="outline" size="icon" onClick={() => select("Skills")} className="h-8 w-8 border-white/10 bg-transparent text-slate-400 hover:bg-white/5 hover:text-white"><Plus className="h-4 w-4" /></Button></div></CardHeader><CardContent className="space-y-3 p-5">{skills.data?.map(skill => <button key={skill.id} onClick={() => select("Skills")} className="group flex w-full items-center gap-3 text-left"><div className={cn("grid h-8 w-8 place-items-center rounded-lg border", colors[skill.category] ?? "border-white/10 bg-white/5 text-slate-400")}><Sparkles className="h-3.5 w-3.5" /></div><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className="truncate text-sm text-slate-300 group-hover:text-cyan-200">{skill.name}</span><StatusDot status={skill.status} /></div><div className="truncate text-[11px] text-slate-600">{skill.summary}</div></div><ArrowUpRight className="h-3.5 w-3.5 text-slate-700 group-hover:text-cyan-300" /></button>)}</CardContent></Card></div>
+
+          <section className="mt-6 grid gap-4 md:grid-cols-3"><Card className="border-white/8 bg-gradient-to-br from-cyan-300/10 to-transparent shadow-none"><CardContent className="p-5"><Code2 className="mb-5 h-5 w-5 text-cyan-300" /><h3 className="font-medium text-slate-100">API Builder</h3><p className="mt-2 text-xs leading-relaxed text-slate-500">Defina capabilities, permissões e limites em um único projeto.</p><button onClick={() => select("API Builder")} className="mt-4 flex items-center gap-1 text-xs text-cyan-300">Configurar <ChevronRight className="h-3.5 w-3.5" /></button></CardContent></Card><Card className="border-white/8 bg-gradient-to-br from-violet-300/10 to-transparent shadow-none"><CardContent className="p-5"><KeyRound className="mb-5 h-5 w-5 text-violet-300" /><h3 className="font-medium text-slate-100">Chaves seguras</h3><p className="mt-2 text-xs leading-relaxed text-slate-500">Acesso por projeto, sem segredos expostos no cliente.</p><button onClick={() => select("Security")} className="mt-4 flex items-center gap-1 text-xs text-violet-300">Revisar segurança <ChevronRight className="h-3.5 w-3.5" /></button></CardContent></Card><Card className="border-white/8 bg-gradient-to-br from-amber-300/10 to-transparent shadow-none"><CardContent className="p-5"><Database className="mb-5 h-5 w-5 text-amber-300" /><h3 className="font-medium text-slate-100">Proveniência</h3><p className="mt-2 text-xs leading-relaxed text-slate-500">Registro explícito de origem, versão, commit e alterações.</p><button onClick={() => select("Registry")} className="mt-4 flex items-center gap-1 text-xs text-amber-300">Abrir registry <ChevronRight className="h-3.5 w-3.5" /></button></CardContent></Card></section>
+
+          <footer className="mt-10 flex flex-col justify-between gap-3 border-t border-white/8 pt-5 text-[11px] text-slate-600 sm:flex-row"><span>Kazer Universal · private workspace · v0.1.0</span><span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Licenças e atribuições são tratadas separadamente</span></footer>
+        </div>
       </main>
     </div>
   );

@@ -1,4 +1,4 @@
-# Kazer Universal
+# Kazer Open Source Universal
 
 Uma camada pública e extensível para organizar capabilities de IA, adapters, providers e skills com foco em segurança, proveniência e créditos corretos.
 

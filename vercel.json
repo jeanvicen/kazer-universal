@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "framework": "vite",
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist/public",
+  "rewrites": [
+    { "source": "/v1/:path*", "destination": "/api/index" },
+    { "source": "/api/trpc", "destination": "/api/index" },
+    { "source": "/api/trpc/:path*", "destination": "/api/index" },
+    { "source": "/trpc/:path*", "destination": "/api/index" },
+    { "source": "/api/oauth/:path*", "destination": "/api/index" },
+    { "source": "/manus-storage/:path*", "destination": "/api/index" }
+  ]
+}
